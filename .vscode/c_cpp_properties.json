@@ -10,6 +10,8 @@
             "includePath": [
                 "E:/_t/robot/include",
                 "E:/_t/robot/src",
+                "E:/_t/robot/.pio/libdeps/cam/PubSubClient/src",
+                "E:/_t/robot/.pio/libdeps/cam/ArduinoJson/src",
                 "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
                 "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include",
                 "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions/freertos",
@@ -198,6 +200,8 @@
                 "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/dio_qspi/include",
                 "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                 "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/variants/esp32",
+                "E:/_t/robot/lib/Mokosh/src",
+                "E:/_t/robot/lib/RemoteDebug/src",
                 "C:/Users/ktos/.platformio/lib/ArduinoJson/src",
                 "C:/Users/ktos/.platformio/lib/PubSubClient/src",
                 "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
@@ -239,6 +243,8 @@
                 "path": [
                     "E:/_t/robot/include",
                     "E:/_t/robot/src",
+                    "E:/_t/robot/.pio/libdeps/cam/PubSubClient/src",
+                    "E:/_t/robot/.pio/libdeps/cam/ArduinoJson/src",
                     "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
                     "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include",
                     "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions/freertos",
@@ -427,6 +433,8 @@
                     "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/dio_qspi/include",
                     "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                     "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/variants/esp32",
+                    "E:/_t/robot/lib/Mokosh/src",
+                    "E:/_t/robot/lib/RemoteDebug/src",
                     "C:/Users/ktos/.platformio/lib/ArduinoJson/src",
                     "C:/Users/ktos/.platformio/lib/PubSubClient/src",
                     "C:/Users/ktos/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
@@ -467,6 +475,7 @@
             "defines": [
                 "PLATFORMIO=60106",
                 "ARDUINO_ESP32_DEV",
+                "BOARD_HAS_PSRAM",
                 "HAVE_CONFIG_H",
                 "MBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\"",
                 "UNITY_INCLUDE_CONFIG_H",
@@ -480,7 +489,7 @@
                 "F_CPU=240000000L",
                 "ARDUINO=10812",
                 "ARDUINO_VARIANT=\"esp32\"",
-                "ARDUINO_BOARD=\"Espressif ESP32 Dev Module\"",
+                "ARDUINO_BOARD=\"AI Thinker ESP32-CAM\"",
                 "ARDUINO_PARTITION_default",
                 ""
             ],
@@ -488,6 +497,7 @@
             "cppStandard": "c++11",
             "compilerPath": "C:/Users/ktos/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe",
             "compilerArgs": [
+                "-mfix-esp32-psram-cache-issue",
                 "-mlongcalls",
                 ""
             ]

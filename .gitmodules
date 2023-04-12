@@ -1,0 +1,6 @@
+[submodule "lib/Mokosh"]
+	path = lib/Mokosh
+	url = git@github.com:ktos/Mokosh.git
+[submodule "lib/RemoteDebug"]
+	path = lib/RemoteDebug
+	url = git@github.com:ktos/RemoteDebug.git
