@@ -9,7 +9,7 @@ void setup()
         ->setHeartbeat(false)
         ->setMDNS(false);
 
-    mokosh.begin("UmbralRose");
+    mokosh.begin("Umbral Rose");
 }
 
 void loop()
