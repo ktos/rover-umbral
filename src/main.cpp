@@ -23,6 +23,11 @@ void updateMeasurements()
     doc["pressure"] = pressure;
     doc["altitude"] = altitude;
 
+    float voltage_ctrl = map(analogRead(35), 0, 4095, 0, 4300) / 1000.0;
+    mdebugI("Battery voltage: %f", voltage_ctrl);
+
+    doc["voltage_ctrl"] = voltage_ctrl;
+
     String output;
     serializeJson(doc, output);
 
@@ -73,6 +78,7 @@ void setup()
             ;
     }
 
+    pinMode(35, INPUT);
     setupRover();
 }
 
