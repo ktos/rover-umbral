@@ -2,10 +2,35 @@
 
 #include <Wire.h>
 #include <SPI.h>
+#include <Adafruit_BMP280.h>
 
 #include "rover.h"
 
 Mokosh mokosh;
+
+Adafruit_BMP280 bmp280;
+
+void updateMeasurements()
+{
+    float temperature, pressure, altitude;
+    temperature = bmp280.readTemperature();
+    pressure = bmp280.readPressure();
+    altitude = bmp280.readAltitude();
+    mdebugI("Temp: %f, pres: %f, alt: %f", temperature, pressure, altitude);
+
+    StaticJsonDocument<256> doc;
+    doc["temperature"] = temperature;
+    doc["pressure"] = pressure;
+    doc["altitude"] = altitude;
+
+    String output;
+    serializeJson(doc, output);
+
+    if (mokosh.isWifiConnected())
+    {
+        mokosh.publish("telemetry", output.c_str());
+    }
+}
 
 void customCommand(uint8_t *message, unsigned int length)
 {
@@ -30,14 +55,23 @@ void customCommand(uint8_t *message, unsigned int length)
 
 void setup()
 {
+    Wire.begin();
+
     mokosh.setDebugLevel(DebugLevel::DEBUG)
         ->setForceWiFiReconnect(true)
         ->setHeartbeat(false)
         ->setMDNS(false);
 
     mokosh.onCommand = customCommand;
+    mokosh.onInterval(updateMeasurements, 10000, "UPDATEMQTT");
 
     mokosh.begin("Umbral Rose");
+    if (!bmp280.begin(BMP280_ADDRESS_ALT))
+    {
+        mdebugE("BMP280 error");
+        while (1)
+            ;
+    }
 
     setupRover();
 }
