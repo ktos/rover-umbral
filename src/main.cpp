@@ -4,6 +4,9 @@
 #include <SPI.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_AHTX0.h>
+#include <Adafruit_MPU6050.h>
+#include <TickTwo.h>
+#include <SensorFusion.h>
 
 #include "rover.h"
 
@@ -11,8 +14,10 @@ Mokosh mokosh;
 
 Adafruit_BMP280 bmp280;
 Adafruit_AHTX0 aht;
+Adafruit_MPU6050 mpu;
+SF fusion;
 
-void updateMeasurements()
+void telemetry()
 {
     float temperature, pressure, altitude;
     temperature = bmp280.readTemperature();
@@ -41,6 +46,17 @@ void updateMeasurements()
         doc["humidity"] = humidity.relative_humidity;
     }
 
+    // pitch and roll are switched due to orientation of the sensor on the board
+    // TODO: fix this in final board
+    float pitch = fusion.getRoll();
+    float roll = fusion.getPitch();
+    float yaw = fusion.getYaw();
+    mdebugI("Pitch: %.2f deg, Roll: %.2f deg, Yaw: %.2f", pitch, roll, yaw);
+
+    doc["pitch"] = pitch;
+    doc["roll"] = roll;
+    doc["yaw"] = yaw;
+
     String output;
     serializeJson(doc, output);
 
@@ -49,6 +65,20 @@ void updateMeasurements()
         mokosh.publish("telemetry", output.c_str());
     }
 }
+
+float deltaT;
+
+void updateImu()
+{
+    sensors_event_t accel, gyro, temp;
+    mpu.getEvent(&accel, &gyro, &temp);
+
+    deltaT = fusion.deltatUpdate();
+    fusion.MadgwickUpdate(gyro.gyro.x, gyro.gyro.y, gyro.gyro.z, accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, deltaT);
+}
+
+TickTwo sendTelemetry(telemetry, 10000, 0, MILLIS);
+TickTwo updateMpu(updateImu, 100, 0, MILLIS);
 
 void customCommand(uint8_t *message, unsigned int length)
 {
@@ -81,7 +111,7 @@ void setup()
         ->setMDNS(false);
 
     mokosh.onCommand = customCommand;
-    mokosh.onInterval(updateMeasurements, 10000, "UPDATEMQTT");
+    sendTelemetry.start();
 
     mokosh.begin("Umbral Rose");
     if (!bmp280.begin(BMP280_ADDRESS_ALT))
@@ -98,11 +128,22 @@ void setup()
             ;
     }
 
+    if (!mpu.begin())
+    {
+        mdebugE("MPU6050 error");
+        while (1)
+            ;
+    }
+
     pinMode(35, INPUT);
     setupRover();
 }
 
 void loop()
 {
+    updateImu();
+
+    sendTelemetry.update();
+
     mokosh.loop();
 }
