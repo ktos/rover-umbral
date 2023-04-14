@@ -7,6 +7,7 @@
 #include <Adafruit_MPU6050.h>
 #include <TickTwo.h>
 #include <SensorFusion.h>
+#include <Adafruit_VL53L0X.h>
 
 #include "rover.h"
 
@@ -15,7 +16,9 @@ Mokosh mokosh;
 Adafruit_BMP280 bmp280;
 Adafruit_AHTX0 aht;
 Adafruit_MPU6050 mpu;
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 SF fusion;
+uint16_t distance;
 
 void telemetry()
 {
@@ -50,12 +53,22 @@ void telemetry()
     // TODO: fix this in final board
     float pitch = fusion.getRoll();
     float roll = fusion.getPitch();
-    float yaw = fusion.getYaw();
+    float yaw = fusion.getYaw() - 180; // because of the orientation
     mdebugI("Pitch: %.2f deg, Roll: %.2f deg, Yaw: %.2f", pitch, roll, yaw);
 
     doc["pitch"] = pitch;
     doc["roll"] = roll;
     doc["yaw"] = yaw;
+
+    if (distance != 65535)
+    {
+        doc["distance"] = distance / 10.0;
+        mdebugD("Distance: %.2f cm", distance / 10.0);
+    }
+    else
+    {
+        mdebugE("Distance sensor is not working");
+    }
 
     String output;
     serializeJson(doc, output);
@@ -135,6 +148,16 @@ void setup()
             ;
     }
 
+    if (!lox.begin())
+    {
+        mdebugE("Failed to boot VL53L0X");
+        while (1)
+            ;
+    }
+
+    // start continuous ranging
+    lox.startRangeContinuous();
+
     pinMode(35, INPUT);
     setupRover();
 }
@@ -143,7 +166,11 @@ void loop()
 {
     updateImu();
 
-    sendTelemetry.update();
+    if (lox.isRangeComplete())
+    {
+        distance = lox.readRange();
+    }
 
+    sendTelemetry.update();
     mokosh.loop();
 }
