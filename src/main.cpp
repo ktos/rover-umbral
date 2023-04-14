@@ -90,9 +90,6 @@ void updateImu()
     fusion.MadgwickUpdate(gyro.gyro.x, gyro.gyro.y, gyro.gyro.z, accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, deltaT);
 }
 
-TickTwo sendTelemetry(telemetry, 10000, 0, MILLIS);
-TickTwo updateMpu(updateImu, 100, 0, MILLIS);
-
 void customCommand(uint8_t *message, unsigned int length)
 {
     if (length < 32)
@@ -124,7 +121,7 @@ void setup()
         ->setMDNS(false);
 
     mokosh.onCommand = customCommand;
-    sendTelemetry.start();
+    mokosh.registerIntervalFunction(telemetry, 10000);
 
     mokosh.begin("Umbral Rose");
     if (!bmp280.begin(BMP280_ADDRESS_ALT))
@@ -171,6 +168,5 @@ void loop()
         distance = lox.readRange();
     }
 
-    sendTelemetry.update();
     mokosh.loop();
 }
