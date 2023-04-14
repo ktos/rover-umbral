@@ -3,12 +3,14 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_BMP280.h>
+#include <Adafruit_AHTX0.h>
 
 #include "rover.h"
 
 Mokosh mokosh;
 
 Adafruit_BMP280 bmp280;
+Adafruit_AHTX0 aht;
 
 void updateMeasurements()
 {
@@ -16,17 +18,28 @@ void updateMeasurements()
     temperature = bmp280.readTemperature();
     pressure = bmp280.readPressure();
     altitude = bmp280.readAltitude();
-    mdebugI("Temp: %f, pres: %f, alt: %f", temperature, pressure, altitude);
+    mdebugI("Temperature: %.2f*C, pressure: %.2f hPa, altitude: %.2f m", temperature, pressure / 100, altitude);
 
-    StaticJsonDocument<256> doc;
+    DynamicJsonDocument doc(512);
     doc["temperature"] = temperature;
     doc["pressure"] = pressure;
     doc["altitude"] = altitude;
 
     float voltage_ctrl = map(analogRead(35), 0, 4095, 0, 4300) / 1000.0;
-    mdebugI("Battery voltage: %f", voltage_ctrl);
+    mdebugI("Control Li-Po voltage: %.2f V", voltage_ctrl);
+
+    // TODO: motors Li-Po/NIMH voltage
 
     doc["voltage_ctrl"] = voltage_ctrl;
+
+    sensors_event_t humidity;
+    sensors_event_t temperature2;
+    if (aht.getEvent(&humidity, &temperature2))
+    {
+        mdebugI("Temperature: %.2f*C, Humidity: %.2f \%", temperature2.temperature, humidity.relative_humidity);
+        doc["temperature2"] = temperature2.temperature;
+        doc["humidity"] = humidity.relative_humidity;
+    }
 
     String output;
     serializeJson(doc, output);
@@ -74,6 +87,13 @@ void setup()
     if (!bmp280.begin(BMP280_ADDRESS_ALT))
     {
         mdebugE("BMP280 error");
+        while (1)
+            ;
+    }
+
+    if (!aht.begin())
+    {
+        mdebugE("AHT error");
         while (1)
             ;
     }
