@@ -91,25 +91,10 @@ void updateImu()
     fusion.MadgwickUpdate(gyro.gyro.x, gyro.gyro.y, gyro.gyro.z, accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, deltaT);
 }
 
-void customCommand(uint8_t *message, unsigned int length)
+void customCommand(String cmd)
 {
-    if (length < 32)
-    {
-        char msg[32] = {0};
-        for (unsigned int i = 0; i < length; i++)
-        {
-            msg[i] = message[i];
-        }
-        msg[length + 1] = 0;
-
-        mdebugD("Received custom command: %s", msg);
-        String cmd = String(msg, length);
-        rover.executeString(cmd);
-    }
-    else
-    {
-        mdebugE("Message too long for buffer.");
-    }
+    mdebugD("Received command: %s, executing as rover instructions.", cmd.c_str());
+    rover.executeString(cmd);
 }
 
 void setup()
