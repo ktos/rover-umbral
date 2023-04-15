@@ -6,15 +6,29 @@ class Rover
 public:
     void begin(int forwardLeft = 25, int backwardLeft = 26, int forwardRight = 32, int backwardRight = 33)
     {
-        this->forwardLeft = forwardLeft;
-        this->backwardLeft = backwardLeft;
-        this->forwardRight = forwardRight;
-        this->backwardRight = backwardRight;
+        // this->forwardLeft = forwardLeft;
+        // this->backwardLeft = backwardLeft;
+        // this->forwardRight = forwardRight;
+        // this->backwardRight = backwardRight;
 
-        pinMode(backwardLeft, OUTPUT);
-        pinMode(backwardRight, OUTPUT);
-        pinMode(forwardLeft, OUTPUT);
-        pinMode(forwardRight, OUTPUT);
+        // pinMode(backwardLeft, OUTPUT);
+        // pinMode(backwardRight, OUTPUT);
+        // pinMode(forwardLeft, OUTPUT);
+        // pinMode(forwardRight, OUTPUT);
+
+        ledcSetup(0, 5000, 8);
+        ledcSetup(1, 5000, 8);
+        ledcSetup(2, 5000, 8);
+        ledcSetup(3, 5000, 8);
+        ledcAttachPin(forwardLeft, 0);
+        ledcAttachPin(backwardLeft, 1);
+        ledcAttachPin(forwardRight, 2);
+        ledcAttachPin(backwardRight, 3);
+
+        this->forwardLeft = 0;
+        this->backwardLeft = 1;
+        this->forwardRight = 2;
+        this->backwardRight = 3;
 
         stop();
     }
@@ -31,46 +45,46 @@ public:
 
     void stop()
     {
-        digitalWrite(backwardLeft, false);
-        digitalWrite(backwardRight, false);
-        digitalWrite(forwardLeft, false);
-        digitalWrite(forwardRight, false);
+        ledcWrite(backwardLeft, 0);
+        ledcWrite(backwardRight, 0);
+        ledcWrite(forwardLeft, 0);
+        ledcWrite(forwardRight, 0);
     }
 
     void forward()
     {
         mdebugV("forward");
-        digitalWrite(backwardLeft, false);
-        digitalWrite(backwardRight, false);
-        digitalWrite(forwardLeft, true);
-        digitalWrite(forwardRight, true);
+        ledcWrite(backwardLeft, 0);
+        ledcWrite(backwardRight, 0);
+        ledcWrite(forwardLeft, speed);
+        ledcWrite(forwardRight, speed);
     }
 
     void backward()
     {
         mdebugV("backward");
-        digitalWrite(backwardLeft, true);
-        digitalWrite(backwardRight, true);
-        digitalWrite(forwardLeft, false);
-        digitalWrite(forwardRight, false);
+        ledcWrite(backwardLeft, speed);
+        ledcWrite(backwardRight, speed);
+        ledcWrite(forwardLeft, 0);
+        ledcWrite(forwardRight, 0);
     }
 
     void left()
     {
         mdebugV("left");
-        digitalWrite(backwardLeft, true);
-        digitalWrite(backwardRight, false);
-        digitalWrite(forwardLeft, false);
-        digitalWrite(forwardRight, true);
+        ledcWrite(backwardLeft, speed);
+        ledcWrite(backwardRight, 0);
+        ledcWrite(forwardLeft, 0);
+        ledcWrite(forwardRight, speed);
     }
 
     void right()
     {
         mdebugV("right");
-        digitalWrite(backwardLeft, false);
-        digitalWrite(backwardRight, true);
-        digitalWrite(forwardLeft, true);
-        digitalWrite(forwardRight, false);
+        ledcWrite(backwardLeft, 0);
+        ledcWrite(backwardRight, speed);
+        ledcWrite(forwardLeft, speed);
+        ledcWrite(forwardRight, 0);
     }
 
     void wait(int milliseconds)
@@ -129,7 +143,15 @@ public:
         this->frontDistance = frontDistance;
 
         if (frontDistance < safeDistance)
+        {
+            mdebugW("Stopping because distance %d is lower than safe %d", frontDistance, safeDistance);
             stop();
+        }
+    }
+
+    void setSpeed(int speed)
+    {
+        this->speed = speed;
     }
 
 private:
@@ -140,4 +162,5 @@ private:
     uint16_t frontDistance;
     bool isAutonomous = false;
     uint16_t safeDistance = 50;
+    int speed = 155;
 };

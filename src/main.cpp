@@ -94,7 +94,17 @@ void updateImu()
 void customCommand(String cmd)
 {
     mdebugD("Received command: %s, executing as rover instructions.", cmd.c_str());
-    rover.executeString(cmd);
+
+    if (cmd.startsWith("speed="))
+    {
+        int speed = cmd.substring(6).toInt();
+        mdebugD("Setting speed to %d", speed);
+        rover.setSpeed(speed);
+    }
+    else
+    {
+        rover.executeString(cmd);
+    }
 }
 
 void setup()
