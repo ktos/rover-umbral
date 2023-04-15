@@ -19,6 +19,7 @@ Adafruit_MPU6050 mpu;
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 SF fusion;
 uint16_t distance;
+Rover rover;
 
 void telemetry()
 {
@@ -103,7 +104,7 @@ void customCommand(uint8_t *message, unsigned int length)
 
         mdebugD("Received custom command: %s", msg);
         String cmd = String(msg, length);
-        executeString(cmd);
+        rover.executeString(cmd);
     }
     else
     {
@@ -156,7 +157,8 @@ void setup()
     lox.startRangeContinuous();
 
     pinMode(35, INPUT);
-    setupRover();
+
+    rover.begin();
 }
 
 void loop()
@@ -166,6 +168,7 @@ void loop()
     if (lox.isRangeComplete())
     {
         distance = lox.readRange();
+        rover.updateDistance(distance);
     }
 
     mokosh.loop();
