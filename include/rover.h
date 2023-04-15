@@ -127,6 +127,9 @@ public:
     void updateDistance(uint16_t frontDistance)
     {
         this->frontDistance = frontDistance;
+
+        if (frontDistance < safeDistance)
+            stop();
     }
 
 private:
@@ -136,4 +139,5 @@ private:
     int backwardRight;
     uint16_t frontDistance;
     bool isAutonomous = false;
+    uint16_t safeDistance = 50;
 };
