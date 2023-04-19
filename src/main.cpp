@@ -21,6 +21,9 @@ SF fusion;
 uint16_t distance;
 Rover rover;
 
+const int LASER_PIN = 12;
+const int BATTERY_ADC = 35;
+
 void telemetry()
 {
     float temperature, pressure, altitude;
@@ -34,7 +37,7 @@ void telemetry()
     doc["pressure"] = pressure;
     doc["altitude"] = altitude;
 
-    float voltage_ctrl = map(analogRead(35), 0, 4095, 0, 4300) / 1000.0;
+    float voltage_ctrl = map(analogRead(BATTERY_ADC), 0, 4095, 0, 4300) / 1000.0;
     mdebugI("Control Li-Po voltage: %.2f V", voltage_ctrl);
 
     // TODO: motors Li-Po/NIMH voltage
@@ -100,6 +103,12 @@ void customCommand(String cmd)
         mdebugD("Setting speed to %d", speed);
         rover.setSpeed(speed);
     }
+    else if (cmd.startsWith("laser="))
+    {
+        int state = cmd.substring(6).toInt();
+        mdebugD("Setting laser to %d", state);
+        digitalWrite(LASER_PIN, state);
+    }
     else
     {
         rover.executeString(cmd);
@@ -108,9 +117,6 @@ void customCommand(String cmd)
 
 void setup()
 {
-    pinMode(12, OUTPUT);
-    digitalWrite(12, HIGH);
-
     Wire.begin();
 
     mokosh.setDebugLevel(DebugLevel::DEBUG)
@@ -162,7 +168,8 @@ void setup()
     lox.startRangeContinuous();
 #endif
 
-    pinMode(35, INPUT);
+    pinMode(BATTERY_ADC, INPUT);
+    pinMode(LASER_PIN, OUTPUT);
 
     rover.begin();
 }
