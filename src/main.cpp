@@ -38,7 +38,6 @@ void telemetry()
     mdebugI("Control Li-Po voltage: %.2f V", voltage_ctrl);
 
     // TODO: motors Li-Po/NIMH voltage
-
     doc["voltage_ctrl"] = voltage_ctrl;
 
     sensors_event_t humidity;
@@ -109,6 +108,9 @@ void customCommand(String cmd)
 
 void setup()
 {
+    pinMode(12, OUTPUT);
+    digitalWrite(12, HIGH);
+
     Wire.begin();
 
     mokosh.setDebugLevel(DebugLevel::DEBUG)
@@ -116,11 +118,18 @@ void setup()
         ->setHeartbeat(false)
         ->setMDNS(false);
 
+#ifdef PHANTOM
+#endif
+
     mokosh.onCommand = customCommand;
     mokosh.registerIntervalFunction(telemetry, 10000);
 
     mokosh.begin("Umbral Rose");
+#ifdef PHANTOM
+    if (!bmp280.begin(BMP280_ADDRESS))
+#else
     if (!bmp280.begin(BMP280_ADDRESS_ALT))
+#endif
     {
         mdebugE("BMP280 error");
         while (1)
@@ -141,6 +150,7 @@ void setup()
             ;
     }
 
+#ifndef PHANTOM
     if (!lox.begin())
     {
         mdebugE("Failed to boot VL53L0X");
@@ -150,6 +160,7 @@ void setup()
 
     // start continuous ranging
     lox.startRangeContinuous();
+#endif
 
     pinMode(35, INPUT);
 
@@ -160,11 +171,13 @@ void loop()
 {
     updateImu();
 
+#ifndef PHANTOM
     if (lox.isRangeComplete())
     {
         distance = lox.readRange();
         rover.updateDistance(distance);
     }
+#endif
 
     mokosh.loop();
 }
